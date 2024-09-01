@@ -29,7 +29,7 @@ app.get('/', (req, res) => {
     <input type="text" id="nombre" name="nombre" required>
     <button type="submit">Agregar usuario</button>
     </form>
-    <a href="/usuarios">Usuarios JSON</a>
+    <a href="/usuarios">Jugadores JSON</a>
     `);
   });
   
@@ -41,16 +41,44 @@ app.get('/', (req, res) => {
     const nuevoJugador = {
       id: jugadores.length + 1,
       nombre: req.body.nombre,
+      edad: req.body.edad,
+      lugarProcedencia: req.body.lugarProcedencia
     };
     jugadores.push(nuevoJugador);
     res.redirect('/');
   });
 
   app.get('/jugadores/:nombre', (req, res) => {
-    const nombre = req.params.nombre;
-    const jugador = jugadores.find(gamer => gamer.nombre.toLowerCase() === nombre.toLowerCase())
+    const nombre = req.params.nombre.toLowerCase();
+    const jugador = jugadores.find(gamer => gamer.nombre.toLowerCase() === nombre)
     jugador ? res.json(jugador) : res.status(404).json({ mensaje: 'Jugador no encontrado'})
 })
+
+  app.put('/jugadores/:nombre', (req, res) => {
+    const nombre = req.params.nombre.toLowerCase();
+    const index = jugadores.find(gamer => gamer.nombre.toLowerCase() === nombre)
+    index !== -1 ? (
+        jugadores[index] = {
+            ...jugadores[index],
+            nombre: req.body.nombre || jugadores[index].nombre,
+            edad: req.body.edad || jugadores[index].edad,
+            lugarProcedencia: req.body.lugarProcedencia || jugadores[index].lugarProcedencia,
+        },
+        res.json(jugadores[index])
+    ) :
+        res.status(404).json({ mensaje: 'Jugador no encontrado' });
+})
+
+  app.delete('/jugadores/:nombre', (req,res) => {
+    const nombre = req.params.nombre.toLowerCase();
+    const jugadoresFiltrados = jugadores.find(gamer => gamer.nombre.toLowerCase() === nombre);
+    
+    jugadoresFiltrados.length !== jugadores.length 
+    ? (jugadores = jugadoresFiltrados,
+    res.json({ mensaje: 'Jugador eliminado correctamente' })
+    ) :
+    res.status(404).json({ mensaje: 'Jugador no encontrado' });
+  })
 
 app.listen(PORT, () => {
     console.log(`Express está escuchando en http://localhost:${PORT}/`);
